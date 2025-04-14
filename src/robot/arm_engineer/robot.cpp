@@ -108,24 +108,28 @@ Robot::ArmEngineer::Param param = {
             .id_control = M3508_M2006_CTRL_ID_BASE,
             .model = Device::RMMotor::MOTOR_M3508,
             .can = BSP_CAN_3,
+            .reverse = false,
         },
         Device::RMMotor::Param{
             .id_feedback = 0x202,
             .id_control = M3508_M2006_CTRL_ID_BASE,
             .model = Device::RMMotor::MOTOR_M3508,
             .can = BSP_CAN_3,
+            .reverse = false,
         },
         Device::RMMotor::Param{
             .id_feedback = 0x203,
             .id_control = M3508_M2006_CTRL_ID_BASE,
             .model = Device::RMMotor::MOTOR_M3508,
             .can = BSP_CAN_3,
+            .reverse = false,
         },
         Device::RMMotor::Param{
             .id_feedback = 0x204,
             .id_control = M3508_M2006_CTRL_ID_BASE,
             .model = Device::RMMotor::MOTOR_M3508,
             .can = BSP_CAN_3,
+            .reverse = false,
         },
     },
   },
@@ -213,6 +217,7 @@ Robot::ArmEngineer::Param param = {
         .id_control = GM6020_CTRL_ID_BASE,
         .model = Device::RMMotor::MOTOR_GM6020,
         .can = BSP_CAN_2,
+        .reverse = false,
 },
 
 .limit = {

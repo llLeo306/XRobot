@@ -19,6 +19,8 @@ void bsp_init() {
   SystemClock_Config();
 
   /* Initialize all configured peripherals */
+  bsp_uart_init();
+
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_ADC1_Init();
@@ -45,5 +47,4 @@ void bsp_init() {
   MX_IWDG_Init();
 #endif
   HAL_TIM_Base_Stop_IT(&htim6);
-  bsp_uart_init();
 }

@@ -7,9 +7,10 @@
 #include "dev_dr16.hpp"
 #include "dev_led_rgb.hpp"
 #include "dev_referee.hpp"
+#include "mod_gimbal.hpp"
 #include "mod_launcher.hpp"
+// #include "mod_omni_chassis.hpp"
 #include "mod_omni_chassis.hpp"
-#include "mod_omni_gimbal.hpp"
 
 void robot_init();
 namespace Robot {
@@ -39,7 +40,9 @@ class OmniInfantry {
   Module::Launcher launcher_;
 
   OmniInfantry(Param& param, float control_freq)
-      : bmi088_(param.bmi088_rot),
+      : cmd_(Component::CMD::CMD_AUTO_CTRL),
+        ai_(false),
+        bmi088_(param.bmi088_rot),
         cap_(param.cap),
         chassis_(param.chassis, control_freq),
         gimbal_(param.gimbal, control_freq),

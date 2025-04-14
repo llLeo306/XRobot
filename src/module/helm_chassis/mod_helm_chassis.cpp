@@ -118,6 +118,12 @@ HelmChassis<Motor, MotorParam>::HelmChassis(Param& param, float control_freq)
     auto raw_ref_sub = Message::Subscriber<Device::Referee::Data>("referee");
     auto cap_sub = Message::Subscriber<Device::Cap::Info>("cap_info");
 
+    auto eulr_sub = Message::Subscriber<Component::Type::Eulr>("ahrs_eulr");
+    auto quat_sub =
+        Message::Subscriber<Component::Type::Quaternion>("ahrs_quat");
+
+    auto pit_motor_sub = Message::Subscriber<float>("chassis_pit_");
+
     uint32_t last_online_time = bsp_time_get_ms();
 
     while (1) {
@@ -126,6 +132,10 @@ HelmChassis<Motor, MotorParam>::HelmChassis(Param& param, float control_freq)
       yaw_sub.DumpData(chassis->yaw_);
       raw_ref_sub.DumpData(chassis->raw_ref_);
       cap_sub.DumpData(chassis->cap_);
+
+      eulr_sub.DumpData(chassis->eulr_);
+      quat_sub.DumpData(chassis->quat_);
+      pit_motor_sub.DumpData(chassis->pit_);
 
       chassis->ctrl_lock_.Wait(UINT32_MAX);
       /* 更新反馈值 */
@@ -146,6 +156,19 @@ HelmChassis<Motor, MotorParam>::HelmChassis(Param& param, float control_freq)
 
   System::Timer::Create(this->DrawUIDynamic, this, 200);
 }
+
+/*
+template <typename Motor, typename MotorParam>
+float HelmChassis<Motor, MotorParam>::CalculateFeedforwardForce(float angle) {
+  if (angle == angle_a) {
+    F = 拟合函数
+  } else if (angle == angle_b) {
+    F = 拟合函数
+  } else {
+    F = 0.0f;
+  }
+  return F;}}
+*/
 
 template <typename Motor, typename MotorParam>
 void HelmChassis<Motor, MotorParam>::PraseRef() {
@@ -176,7 +199,7 @@ bool HelmChassis<Motor, MotorParam>::LimitChassisOutPower(float power_limit,
   }
 
   float sum_motor_power = 0.0f;
-  float motor_3508_power[4];
+  std::vector<float> motor_3508_power(len);
   for (size_t i = 0; i < len; i++) {
     motor_3508_power[i] =
         this->param_.toque_coefficient_3508 * fabsf(motor_out[i]) *
@@ -233,7 +256,7 @@ void HelmChassis<Motor, MotorParam>::Control() {
     case HelmChassis::CHASSIS_6020_FOLLOW_GIMBAL: {
       float tmp = sqrtf(cmd_.x * cmd_.x + cmd_.y * cmd_.y) * 1.41421f / 2.0f;
 
-      clampf(&tmp, -1.0f, 1.0f);
+      clampf(&tmp, -1.0f, 1.0f);  //单位圆
 
       this->move_vec_.vx = 0;
       this->move_vec_.vy = tmp;
@@ -285,6 +308,8 @@ void HelmChassis<Motor, MotorParam>::Control() {
       XB_ASSERT(false);
       return;
   }
+
+  //  float feedforwardForce = CalculateFeedforwardForce(CurrentAngle);
 
   /* 根据底盘模式计算电机目标角度和速度 */
   switch (this->mode_) {
@@ -338,6 +363,7 @@ void HelmChassis<Motor, MotorParam>::Control() {
 
   /* 输出计算 */
   for (int i = 0; i < 4; i++) {
+    //   out_.speed_motor_out[i] += feedforwardForce;
     if (motor_reverse_[i]) {
       out_.speed_motor_out[i] =
           speed_actr_[i]->Calculate(-setpoint_.motor_rotational_speed[i],
@@ -386,6 +412,14 @@ void HelmChassis<Motor, MotorParam>::Control() {
       this->pos_motor_[i]->Control(out_.motor6020_out[i]);
     }
   }
+}
+
+template <typename Motor, typename MotorParam>
+float HelmChassis<Motor, MotorParam>::GetCurrentAngle() {
+  this->yaw_ = eulr_.yaw;
+  this->pit_ = eulr_.pit - pit_;
+  this->rol_ = eulr_.rol;
+  return eulr_.yaw;
 }
 
 template <typename Motor, typename MotorParam>

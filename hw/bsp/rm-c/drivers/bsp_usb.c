@@ -6,7 +6,7 @@
 #include "tusb.h"
 
 static bsp_callback_t callback_list[BSP_USB_NUM][BSP_USB_CB_NUM];
-
+/*cmd calibration*/
 bsp_status_t bsp_usb_transmit(const uint8_t *buffer, uint32_t len) {
   while (1) {
     uint32_t avil = tud_cdc_write_available();
@@ -24,6 +24,13 @@ bsp_status_t bsp_usb_transmit(const uint8_t *buffer, uint32_t len) {
   }
   return BSP_OK;
 }
+/*Manual calibration*/
+// bsp_status_t bsp_usb_transmit(const uint8_t *buffer, uint32_t len) {
+//   // 空函数，直接返回 BSP_OK
+//   XB_UNUSED(buffer);  // 避免未使用参数的警告
+//   XB_UNUSED(len);     // 避免未使用参数的警告
+//   return BSP_OK;
+// }
 
 char bsp_usb_read_char(void) {
   char buff = 0;

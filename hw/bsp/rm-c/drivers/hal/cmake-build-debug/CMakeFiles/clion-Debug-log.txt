@@ -1,0 +1,3 @@
+C:\Windows\system32\wsl.exe --distribution Ubuntu --exec "/mnt/d/Programfiles/CLion 2024.1.5/bin/ttyfix" /bin/bash -c "export PATH=\"/usr/bin:$PATH\" && export CLION_IDE=TRUE && export CMAKE_COLOR_DIAGNOSTICS=ON && export JETBRAINS_IDE=TRUE && cd /mnt/z/home/leo/ERobot/hw/bsp/rm-c/drivers/hal/cmake-build-debug && /usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja -G Ninja -S /mnt/z/home/leo/ERobot/hw/bsp/rm-c/drivers/hal -B /mnt/z/home/leo/ERobot/hw/bsp/rm-c/drivers/hal/cmake-build-debug"
+<3>WSL (42079) ERROR: CreateProcessParseCommon:763: Failed to translate Z:\home\leo\ERobot\hw\bsp\rm-c\drivers\hal\cmake-build-debug
+/bin/bash: line 1: cd: /mnt/z/home/leo/ERobot/hw/bsp/rm-c/drivers/hal/cmake-build-debug: No such file or directory

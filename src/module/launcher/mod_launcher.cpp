@@ -3,7 +3,7 @@
 #include "bsp_pwm.h"
 #include "bsp_time.h"
 
-#define LAUNCHER_TRIG_SPEED_MAX (8191)
+#define LAUNCHER_TRIG_SPEED_MAX (16000)
 
 using namespace Module;
 
@@ -76,8 +76,8 @@ Launcher::Launcher(Param& param, float control_freq)
   Component::CMD::RegisterEvent<Launcher*, LauncherEvent>(
       event_callback, this, this->param_.EVENT_MAP);
 
-  bsp_pwm_start(BSP_PWM_LAUNCHER_SERVO);
-  bsp_pwm_set_comp(BSP_PWM_LAUNCHER_SERVO, this->param_.cover_close_duty);
+  // bsp_pwm_start(BSP_PWM_LAUNCHER_SERVO);
+  // bsp_pwm_set_comp(BSP_PWM_LAUNCHER_SERVO, this->param_.cover_close_duty);
 
   auto launcher_thread = [](Launcher* launcher) {
     auto ref_sub = Message::Subscriber<Device::Referee::Data>("referee");
@@ -242,13 +242,15 @@ void Launcher::Control() {
       for (size_t i = 0; i < LAUNCHER_ACTR_FRIC_NUM; i++) {
         this->fric_motor_[i]->Relax();
       }
-      bsp_pwm_stop(BSP_PWM_LAUNCHER_SERVO);
+      // sp_pwm_stop(BSP_PWM_LAUNCHER_SERVO);
       break;
 
     case SAFE:
     case LOADED:
       for (int i = 0; i < LAUNCHER_ACTR_TRIG_NUM; i++) {
         /* 控制拨弹电机 */
+        float trig_speed = this->trig_motor_[i]->GetSpeed();
+        clampf(&trig_speed, 0.f, LAUNCHER_TRIG_SPEED_MAX);
         float trig_out = this->trig_actuator_[i]->Calculate(
             this->setpoint_.trig_angle_,
             this->trig_motor_[i]->GetSpeed() / LAUNCHER_TRIG_SPEED_MAX,
@@ -267,13 +269,15 @@ void Launcher::Control() {
       }
 
       /* 根据弹仓盖开关状态更新弹舱盖打开时舵机PWM占空比 */
-      if (this->cover_mode_ == OPEN) {
-        bsp_pwm_start(BSP_PWM_LAUNCHER_SERVO);
-        bsp_pwm_set_comp(BSP_PWM_LAUNCHER_SERVO, this->param_.cover_open_duty);
-      } else {
-        bsp_pwm_start(BSP_PWM_LAUNCHER_SERVO);
-        bsp_pwm_set_comp(BSP_PWM_LAUNCHER_SERVO, this->param_.cover_close_duty);
-      }
+      // if (this->cover_mode_ == OPEN) {
+      //   bsp_pwm_start(BSP_PWM_LAUNCHER_SERVO);
+      //   bsp_pwm_set_comp(BSP_PWM_LAUNCHER_SERVO,
+      //   this->param_.cover_open_duty);
+      // } else {
+      //   bsp_pwm_start(BSP_PWM_LAUNCHER_SERVO);
+      //   bsp_pwm_set_comp(BSP_PWM_LAUNCHER_SERVO,
+      //   this->param_.cover_close_duty);
+      // }
       break;
   }
 }
@@ -350,26 +354,42 @@ void Launcher::PraseRef() {
   this->ref_.status = this->raw_ref_.status;
 }
 
+// float Launcher::LimitLauncherFreq() { /* 热量限制计算 */
+//   float heat_percent = this->heat_ctrl_.heat / this->heat_ctrl_.heat_limit;
+//   float stable_freq = this->heat_ctrl_.cooling_rate /
+//                       this->heat_ctrl_.heat_increase; /* 每秒可发弹量 */
+//   if (this->param_.model == LAUNCHER_MODEL_42MM) {
+//     return stable_freq;
+//   } else {
+//     if (heat_percent > 0.9f) {
+//       return 0.5f;
+//     } else if (heat_percent > 0.8f) {
+//       return 1.0f;
+//     } else if (heat_percent > 0.6f) {
+//       return 2.0f * stable_freq;
+//     } else if (heat_percent > 0.2f) {
+//       return 3.0f * stable_freq;
+//     } else if (heat_percent > 0.1f) {
+//       return 4.0f * stable_freq;
+//     } else {
+//       return 5.0f;
+//     }
+//   }
+// }
 float Launcher::LimitLauncherFreq() { /* 热量限制计算 */
   float heat_percent = this->heat_ctrl_.heat / this->heat_ctrl_.heat_limit;
   float stable_freq = this->heat_ctrl_.cooling_rate /
                       this->heat_ctrl_.heat_increase; /* 每秒可发弹量 */
-  if (this->param_.model == LAUNCHER_MODEL_42MM) {
-    return stable_freq;
+  if (heat_percent > 0.9f) {
+    return 0.5f;
+  } else if (heat_percent > 0.85f) {
+    return stable_freq * 0.6f;
+  } else if (heat_percent > 0.8f) {
+    return 0.6f * 1000 / this->param_.min_launch_delay;
+  } else if (heat_percent > 0.6f) {
+    return 0.8f * 1000 / this->param_.min_launch_delay;
   } else {
-    if (heat_percent > 0.9f) {
-      return 0.5f;
-    } else if (heat_percent > 0.8f) {
-      return 1.0f;
-    } else if (heat_percent > 0.6f) {
-      return 2.0f * stable_freq;
-    } else if (heat_percent > 0.2f) {
-      return 3.0f * stable_freq;
-    } else if (heat_percent > 0.1f) {
-      return 4.0f * stable_freq;
-    } else {
-      return 5.0f;
-    }
+    return 1000 / this->param_.min_launch_delay;
   }
 }
 void Launcher::DrawUIStatic(Launcher* launcher) {

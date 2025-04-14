@@ -27,7 +27,7 @@
 #include "dev_motor.hpp"
 #include "dev_referee.hpp"
 #include "dev_rm_motor.hpp"
-#define PI (M_2PI)
+#define PI_ (M_2PI)
 
 namespace Module {
 template <typename Motor, typename MotorParam>
@@ -66,6 +66,10 @@ class HelmChassis {
 
     std::array<MotorParam, 4> pos_motor_param;
     std::array<MotorParam, 4> speed_motor_param;
+
+    Device::RMMotor::Param yaw_motor;
+    Device::RMMotor::Param pit_motor;
+
   } Param;
 
   typedef struct {
@@ -75,6 +79,12 @@ class HelmChassis {
     float chassis_watt;
   } RefForChassis;
 
+  /* typedef struct {
+     float current_yaw;
+     float current_pit;
+     float current_rol;
+   }CurrentAngle;
+ */
   HelmChassis(Param &param, float control_freq);
 
   void PraseRef();
@@ -99,6 +109,10 @@ class HelmChassis {
 
   float CalcWz(const float LO, const float HI);
 
+  float CalculateFeedforwardForce(float angle);  //计算前馈力
+
+  float GetCurrentAngle();  //获取当前欧拉角并计算爬坡角度
+
  private:
   Param param_;
 
@@ -108,7 +122,8 @@ class HelmChassis {
 
   uint64_t now_ = 0;
   float yaw_;
-
+  float pit_;
+  float rol_;
   float pos_motor_sum_out_;
 
   float max_motor_rotational_speed_;
@@ -136,6 +151,8 @@ class HelmChassis {
   Component::Type::MoveVector move_vec_; /* 底盘实际的运动向量    */
 
   float wz_dir_mult_; /* 小陀螺模式旋转方向乘数 */
+
+  float angle_a, angle_b, F;
 
   /* PID计算的目标值 */
   struct {
@@ -167,6 +184,10 @@ class HelmChassis {
   std::array<float, 4> speed_motor_out_;
 
   std::array<float, 4> pos_motor_out_;
+
+  Component::Type::Eulr eulr_;
+  Component::Type::Quaternion quat_;
+  Component::Type::Vector3 gyro_;
 };
 
 typedef HelmChassis<Device::RMMotor, Device::RMMotor::Param> RMHelmChassis;

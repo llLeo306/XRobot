@@ -19,23 +19,24 @@ class Gimbal {
  public:
   /* 云台运行模式 */
   typedef enum {
-    RELAX, /* 放松模式，电机不输出。一般情况云台初始化之后的模式 */
-    ABSOLUTE, /* 绝对坐标系控制，控制在空间内的绝对姿态 */
+    RELAX,     /* 放松模式，电机不输出。一般情况云台初始化之后的模式 */
+    ABSOLUTE,  /* 绝对坐标系控制，控制在空间内的绝对姿态 */
+    AI_CONTROL /*Host control mode, based on absolute coordinate system
+                  control*/
   } Mode;
 
   enum {
     GIMBAL_CTRL_YAW_OMEGA_IDX = 0, /* Yaw轴控制的角速度环控制器的索引值 */
-    GIMBAL_CTRL_YAW_ANGLE_IDX, /* Yaw轴控制的角度环控制器的索引值 */
-    GIMBAL_CTRL_PIT_OMEGA_IDX, /* Pitch轴控制的角速度环控制器的索引值 */
-    GIMBAL_CTRL_PIT_ANGLE_IDX, /* Pitch轴控制的角度环控制器的索引值 */
-    GIMBAL_CTRL_NUM,           /* 总共的控制器数量 */
+    GIMBAL_CTRL_YAW_ANGLE_IDX,     /* Yaw轴控制的角度环控制器的索引值 */
+    GIMBAL_CTRL_PIT_OMEGA_IDX,     /* Pitch轴控制的角速度环控制器的索引值 */
+    GIMBAL_CTRL_PIT_ANGLE_IDX,     /* Pitch轴控制的角度环控制器的索引值 */
+    GIMBAL_CTRL_NUM,               /* 总共的控制器数量 */
   };
 
   typedef enum {
     SET_MODE_RELAX,
     SET_MODE_ABSOLUTE,
-    START_AUTO_AIM,
-    STOP_AUTO_AIM,
+    SET_MODE_AUTO_AIM,
   } GimbalEvent;
 
   typedef struct {
@@ -44,6 +45,8 @@ class Gimbal {
 
     Component::PosActuator::Param yaw_actr;
     Component::PosActuator::Param pit_actr;
+    Component::PosActuator::Param yaw_ai_actr;
+    Component::PosActuator::Param pit_ai_actr;
 
     Device::RMMotor::Param yaw_motor;
     Device::RMMotor::Param pit_motor;
@@ -92,6 +95,8 @@ class Gimbal {
 
   Component::PosActuator yaw_actuator_;
   Component::PosActuator pit_actuator_;
+  Component::PosActuator yaw_ai_actuator_;
+  Component::PosActuator pit_ai_actuator_;
 
   Device::RMMotor yaw_motor_;
   Device::RMMotor pit_motor_;
@@ -101,8 +106,16 @@ class Gimbal {
   System::Semaphore ctrl_lock_;
 
   Message::Topic<float> yaw_tp_ = Message::Topic<float>("chassis_yaw");
+  Message::Topic<float> pit_tp_ = Message::Topic<float>("chassis_pit");
+  Message::Topic<float> eulr_tp_ = Message::Topic<float>("ahrs_eulr");
+  Message::Topic<float> quat_tp_ = Message::Topic<float>("ahrs_quat");
+  // Message::Topic<Device::RMMotor> pit_motor_tp_ =
+  //     Message::Topic<Device::RMMotor>("chassis_pit_motor");
+  // Message::Topic<Device::RMMotor> yaw_motor_tp_ =
+  //     Message::Topic<Device::RMMotor>("chassis_yaw_motor");
 
   float yaw_;
+  float pit_;
 
   Component::UI::String string_;
 

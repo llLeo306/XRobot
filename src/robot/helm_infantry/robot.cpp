@@ -249,28 +249,28 @@ Robot::HelmInfantry::Param param =
                             .id_control = GM6020_CTRL_ID_BASE,
                             .model = Device::RMMotor::MOTOR_GM6020,
                             .can = BSP_CAN_2,
-                            .reverse = false
+                            .reverse = false,
                         },
                         Device::RMMotor::Param{
                             .id_feedback = 0x206,
                             .id_control = GM6020_CTRL_ID_BASE,
                             .model = Device::RMMotor::MOTOR_GM6020,
                             .can = BSP_CAN_2,
-                            .reverse = false
+                            .reverse = false,
                         },
                         Device::RMMotor::Param{
                             .id_feedback = 0x208,
                             .id_control = GM6020_CTRL_ID_BASE,
                             .model = Device::RMMotor::MOTOR_GM6020,
                             .can = BSP_CAN_2,
-                            .reverse = false
+                            .reverse = false,
                         },
                         Device::RMMotor::Param{
                             .id_feedback = 0x207,
                             .id_control = GM6020_CTRL_ID_BASE,
                             .model = Device::RMMotor::MOTOR_GM6020,
                             .can = BSP_CAN_2,
-                            .reverse = false
+                            .reverse = false,
                         },
                     },
                 .speed_motor_param =
@@ -398,7 +398,7 @@ Robot::HelmInfantry::Param param =
                         .id_control = GM6020_CTRL_ID_EXTAND,
                         .model = Device::RMMotor::MOTOR_GM6020,
                         .can = BSP_CAN_2,
-                        .reverse = false
+                        .reverse = false,
                     },
 
                 .pit_motor =
@@ -536,14 +536,14 @@ Robot::HelmInfantry::Param param =
             .id_control = M3508_M2006_CTRL_ID_EXTAND,
             .model = Device::RMMotor::MOTOR_M3508,
             .can = BSP_CAN_1,
-            .reverse = false
+            .reverse = false,
         },
         Device::RMMotor::Param{
             .id_feedback = 0x207,
             .id_control = M3508_M2006_CTRL_ID_EXTAND,
             .model = Device::RMMotor::MOTOR_M3508,
             .can = BSP_CAN_1,
-            .reverse = false
+            .reverse = false,
         },
         },
 
